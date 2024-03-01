@@ -16,20 +16,25 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 find_package(OpenGL REQUIRED)
 
 if (WIN32)
-	set(LIBS glfw opengl32)
+	set(LIBS glfw opengl32 glad)
 elseif (UNIX)
-	set(LIBS glfw GL)
+	set(LIBS glfw GL glad)
 endif ()
 
 set(GLFW_DIR glfw)
+set(GLAD_DIR glad)
 
 add_subdirectory(${GLFW_DIR})
+add_subdirectory(${GLAD_DIR})
 
 target_include_directories(${PROJECT_NAME} 
 	PUBLIC ${GLFW_DIR}/include
-	PUBLIC ${GLFW_DIR}/deps
+    PUBLIC ${GLAD_DIR}/include
 )
+
 target_link_directories(${PROJECT_NAME} 
 	PRIVATE ${GLFW_DIR}/src
+    PRIVATE ${GLAD_DIR}/src
 )
+
 target_link_libraries(${PROJECT_NAME} ${LIBS})
