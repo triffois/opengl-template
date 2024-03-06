@@ -1,7 +1,10 @@
 #include "use_opengl.h"
 #include <math.h>
 
+#include <cstring>
+#include <fstream>
 #include <iostream>
+#include <string>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -17,16 +20,15 @@ const char *vertexShaderSource =
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
-const char *fragmentShaderSource =
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "uniform vec2 iResolution;\n"
-    "uniform float iTime;\n"
-    "in vec4 gl_FragCoord;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(gl_FragCoord.xy / iResolution, 0, 1);\n"
-    "}\n\0";
+
+const char *readShader() {
+  std::ifstream file("shader.frag");
+  std::string shader((std::istreambuf_iterator<char>(file)),
+                     std::istreambuf_iterator<char>());
+  char *cstr = new char[shader.length() + 1];
+  std::strcpy(cstr, shader.c_str());
+  return cstr;
+}
 
 int main() {
   // glfw: initialize and configure
@@ -76,7 +78,8 @@ int main() {
   }
   // fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+  const char *shaderSource = readShader();
+  glShaderSource(fragmentShader, 1, &shaderSource, NULL);
   glCompileShader(fragmentShader);
   // check for shader compile errors
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -134,6 +137,7 @@ int main() {
 
   // render loop
   // -----------
+  int frame = 0;
   while (!glfwWindowShouldClose(window)) {
     // input
     // -----
@@ -170,6 +174,8 @@ int main() {
     glUniform2f(screenSizeLocation, width, height);
     int timeLocation = glGetUniformLocation(shaderProgram, "iTime");
     glUniform1f(timeLocation, timeValue);
+    int frameLocation = glGetUniformLocation(shaderProgram, "iFrame");
+    glUniform1i(frameLocation, frame++);
 
     glUseProgram(shaderProgram);
   }
