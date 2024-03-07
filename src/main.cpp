@@ -21,8 +21,8 @@ const char *vertexShaderSource =
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 
-const char *readShader() {
-  std::ifstream file("shader.frag");
+const char *readShader(std::string filename) {
+  std::ifstream file(filename);
   std::string shader((std::istreambuf_iterator<char>(file)),
                      std::istreambuf_iterator<char>());
   char *cstr = new char[shader.length() + 1];
@@ -30,7 +30,13 @@ const char *readShader() {
   return cstr;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " <shader file>" << std::endl;
+    return 1;
+  }
+  std::string shaderPath = argv[1];
+
   // glfw: initialize and configure
   // ------------------------------
   glfwInit();
@@ -78,7 +84,7 @@ int main() {
   }
   // fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  const char *shaderSource = readShader();
+  const char *shaderSource = readShader(shaderPath);
   glShaderSource(fragmentShader, 1, &shaderSource, NULL);
   glCompileShader(fragmentShader);
   // check for shader compile errors
